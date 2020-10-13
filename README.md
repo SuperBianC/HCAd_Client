@@ -33,6 +33,7 @@ pip install -r requirements.txt
     ```
     > 与关系：`&&`； 或关系：`||`； 非关系： `!`； 等于： `==`； 不等于 `<>`;
     >> 注：正常的空格并不影响，但最好不要再字符串尾部出现多余空格，不然有几率bug
+    
 5. `HCAd_Client.get_columnsbycell(rows_to_get,cols_to_get,col_condition)`
    
    根据需要的行和需要的列，返回`pd.Dataframe`;
@@ -49,8 +50,23 @@ pip install -r requirements.txt
    返回指定列的所有行数据，返回类型为`List`，默认返回所有列。
    
    可选参数`cols_to_get`为所需列列名的`list`。
+   
+8. `HCAd_Client.update_row(primary_key, update_data)` & `HCAd_Client.update_batch(rows_to_update, update_sets)`
+
+   更新行数据。
+   
+   `update_row`用于更新单行数据
+   > `primary_key` 是主键，如[('study_id','10.1038/s41467-019-10756-2'), ('cell_id','human_control-AAACCTGAGCTGAAAT'),('user_id',3)]
+   > `updtae_data` 是待更新的列的list，如[(col1,val1),(col2,val2)]
+   
+   `update_batch`用于更新多行数据，传入的参数为`update_row`接口传入参数的列表。
 
 ## ChangeLog
+
+### 2020.10.13 `v1.4.2`
+
+- 添加了`update_row`和`update_batch`方法，用于更新表内已有的数据。
+- 加入了数据上传异常的断点机制，出现异常会停止上传，并返回未上传的dataframe数据。
 
 ### 2020.09.19 `v1.4.1`
 
