@@ -215,8 +215,11 @@ class HCAd_Client:
                     consumed, return_row = self._Ali_client.update_row(self._tablename, row[i], condition)
             except tablestore.OTSClientError as e:
                 print (e.get_error_message())
+                return -1
             except tablestore.OTSServiceError as e:
                 print (e.get_error_message())
+                return -1
+        return 0
         
     
     def insert_matrix(self, df_expression, df_annotation):
@@ -234,13 +237,31 @@ class HCAd_Client:
             print("Cell number doesn't match.")
             return -1
         
-        for i in range(df_annotation.shape[0]):
-            row = self._Cell2Row(df_expression.iloc[:,i],df_annotation.iloc[i,:])
-            self._insert_row(row)
-            if i % 50 == 0:
-                print('\rUploading：{0}{1}%'.format('▉'*(i*30//df_annotation.shape[0]),(i*100//df_annotation.shape[0])), end='')
+        nrow = df_annotation.shape[0]
+        nrow_slice = 10000
+        
+        for i in range(nrow // nrow_slice + 1):
+            for j in range(nrow_slice):
+                if nrow_slice * i + j == nrow:
+                    break
+                row = self._Cell2Row(df_expression.iloc[:,nrow_slice * i + j],df_annotation.iloc[nrow_slice * i + j,:])
+                insert_stat = self._insert_row(row)
+                if insert_stat == -1:
+                    print(
+                        "Error uploading data. An Error Occurred.\nCurrent row: {0}; Private Key: [('study_id', '{1}'), ('cell_id', '{2}'), ('user_id', '{3}')]"
+                        .format(
+                            nrow_slice * i + j,
+                            df_annotation.iloc[nrow_slice * i + j, "study_id"],
+                            df_annotation.iloc[nrow_slice * i + j, "cell_id"],
+                            df_annotation.iloc[nrow_slice * i + j, "user_id"]
+                        )
+                    )
+                    return [df_expression.iloc[:,nrow_slice * i + j:], df_annotation.iloc[nrow_slice * i + j: ,:]]
+                if nrow_slice * i + j % 50 == 0:
+                    print('\rUploading：{0}{1}%'.format('▉'*(nrow_slice * i + j*30//df_annotation.shape[0]),(nrow_slice * i + j*100//df_annotation.shape[0])), end='')
         print('\rUploading：{0}{1}%'.format('▉'*(30),(100)), end='')    
         print("\r\n Upload finished. %d rows uploaded." % df_annotation.shape[0])
+        return 0
         
         
         
@@ -351,3 +372,39 @@ class HCAd_Client:
         print("%d cells found" %len(all_rows))
 
         return all_rows
+    
+        def update_row(self, primary_key, update_data):
+    # primary_key 是主键，如[('study_id','10.1038/s41467-019-10756-2'), ('cell_id','human_control-AAACCTGAGCTGAAAT'),('user_id',3)]
+    # updtae_data 是待更新的列的list，[(col1,val1),(col2,val2)]
+        try:
+            consumed, return_row, next_token = self._Ali_client.get_row(self._tablename, primary_key,columns_to_get=['donor_gender'])
+            if return_row == None:
+                print("Error! This row doesn't exist in the table.")
+            else:
+                # convert update data to blockes
+                row = []
+                for i in range(len(update_data)//1024+1): # the maxium number of attribute columns in each writing operation is 1024
+                    row.append(tablestore.Row(primary_key,{'PUT':update_data[i*1024:min(i*1024+1024,len(update_data))]}))
+
+                # try to update data
+                condition = tablestore.Condition(tablestore.RowExistenceExpectation.IGNORE)
+                for i in range(len(row)):
+                    try :
+                        consumed, return_row = self._Ali_client.update_row(self._tablename, row[i], condition)
+                    except tablestore.OTSClientError as e:
+                        print (e.get_error_message())
+                    except tablestore.OTSServiceError as e:
+                        print (e.get_error_message())
+
+        except tablestore.OTSClientError as e:
+            print (e.get_error_message()) 
+        except tablestore.OTSServiceError as e:
+            print (e.get_error_message())
+            
+            
+    
+    def update_batch(self, rows_to_update, update_sets):
+        for i in range(len(rows_to_update)):
+            primary_key = rows_to_update[i]
+            update_data = update_sets[i] 
+            self.update_row(primary_key, update_data)
