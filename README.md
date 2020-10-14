@@ -15,9 +15,9 @@ pip install -r requirements.txt
    
    用于连接服务器
 
-2. `HCAd_Client.insert_matrix(df_expression, df_annotation, genenum_chk)`
+2. `HCAd_Client.insert_matrix(df_expression, df_annotation, genenum_chk, start_row = 0)
    
-   用于上传数据，如果用于非人类的转录组数据（基因数不等于43878）请将genenum_chk设置为False.
+   用于上传数据，如果用于非人类的转录组数据（基因数不等于43878）请将genenum_chk设置为False. start_row用于决定从df_annotation矩阵的哪一行开始上传
 
 3. `HCAd_Client.build_index()`
    
@@ -62,6 +62,10 @@ pip install -r requirements.txt
    `update_batch`用于更新多行数据，传入的参数为`update_row`接口传入参数的列表。
 
 ## ChangeLog
+### 2020.10.14 `v1.4.3`
+
+- 改变了`insert_matrix`方法中的输入正确性检查内容，加入了参数`genenum_chk`，用于决定是否要检查基因数；加入了对df_expression和df_annotation细胞顺序是否一致的检查。
+- 更新了数据上传异常的断点机制，出现异常会停止上传，并返回未上传部分的起始行号。通过`insert_matrix`方法的`start_row`参数可以选择从哪一行（哪一个细胞)开始上传。
 
 ### 2020.10.13 `v1.4.2`
 
@@ -73,8 +77,8 @@ pip install -r requirements.txt
 - Bug fixed.
 
 ### 2020.09.18 `v1.4`
-- 添加get_all_rows方法。如需获取所有行数据请使用该方法，效率更高。
-- 更新了get_column_set方法。
+- 添加`get_all_rows`方法。如需获取所有行数据请使用该方法，效率更高。
+- 更新了`get_column_set`方法。
 
 ### 2020.09.17 `v1.3.1`
 
