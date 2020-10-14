@@ -256,7 +256,7 @@ class HCAd_Client:
                             df_annotation.iloc[nrow_slice * i + j, "user_id"]
                         )
                     )
-                    return [df_expression.iloc[:,nrow_slice * i + j:], df_annotation.iloc[nrow_slice * i + j: ,:]]
+                    return -1
                 if nrow_slice * i + j % 50 == 0:
                     print('\rUploading：{0}{1}%'.format('▉'*(nrow_slice * i + j*30//df_annotation.shape[0]),(nrow_slice * i + j*100//df_annotation.shape[0])), end='')
         print('\rUploading：{0}{1}%'.format('▉'*(30),(100)), end='')    
