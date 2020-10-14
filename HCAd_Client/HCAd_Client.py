@@ -222,7 +222,7 @@ class HCAd_Client:
         return 0
         
     
-    def insert_matrix(self, df_expression, df_annotation, genenum_chk=True):
+    def insert_matrix(self, df_expression, df_annotation, genenum_chk=True, start_row = 0):
         if (not genenum_chk) or df_expression.shape[0] != 43878:
             print("Gene number error.")
             return -1
@@ -241,31 +241,31 @@ class HCAd_Client:
             print("Cell names or orders doesn't match.")
             return -1
         
-        nrow = df_annotation.shape[0]
+        nrow = df_annotation.shape[0]-start_row
         nrow_slice = 10000
         
         for i in range(nrow // nrow_slice + 1):
             for j in range(nrow_slice):
                 if nrow_slice * i + j == nrow:
                     break
-                row = self._Cell2Row(df_expression.iloc[:,nrow_slice * i + j],df_annotation.iloc[nrow_slice * i + j,:])
+                row = self._Cell2Row(df_expression.iloc[:,start_row + nrow_slice * i + j],df_annotation.iloc[start_row + nrow_slice * i + j,:])
                 insert_stat = self._insert_row(row)
                 if insert_stat == -1:
                     print(
                         "Error uploading data. An Error Occurred.\nCurrent row: {0}; Private Key: [('study_id', '{1}'), ('cell_id', '{2}'), ('user_id', '{3}')]"
                         .format(
                             nrow_slice * i + j,
-                            df_annotation.iloc[nrow_slice * i + j, "study_id"],
-                            df_annotation.iloc[nrow_slice * i + j, "cell_id"],
-                            df_annotation.iloc[nrow_slice * i + j, "user_id"]
+                            df_annotation.iloc[start_row + nrow_slice * i + j, "study_id"],
+                            df_annotation.iloc[start_row + nrow_slice * i + j, "cell_id"],
+                            df_annotation.iloc[start_row + nrow_slice * i + j, "user_id"]
                         )
                     )
-                    return -1
+                    return -1*(start_row + nrow_slice * i + j)
                 if nrow_slice * i + j % 50 == 0:
                     print('\rUploading：{0}{1}%'.format('▉'*(nrow_slice * i + j*30//df_annotation.shape[0]),(nrow_slice * i + j*100//df_annotation.shape[0])), end='')
         print('\rUploading：{0}{1}%'.format('▉'*(30),(100)), end='')    
         print("\r\n Upload finished. %d rows uploaded." % df_annotation.shape[0])
-        return 0
+        return 1
         
         
         
