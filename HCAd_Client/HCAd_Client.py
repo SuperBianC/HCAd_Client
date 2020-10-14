@@ -266,7 +266,8 @@ class HCAd_Client:
         
         
     def build_index(self):
-        if 'metadata' in self._Ali_client.list_search_index(self._tablename)[0]:
+        index_list = self._Ali_client.list_search_index(self._tablename)
+        if index_list and 'metadata' in index_list:
             print("index already exist.")
         else:
             # create index
