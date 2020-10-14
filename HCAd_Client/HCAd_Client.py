@@ -271,7 +271,7 @@ class HCAd_Client:
             print("index already exist.")
         else:
             # create index
-            field_uid = tablestore.FieldSchema('user_id',tablestore.FieldType.KEYWORD, is_array = False, index = True, enable_sort_and_agg = True, store = True)
+            field_uid = tablestore.FieldSchema('user_id',tablestore.FieldType.LONG, is_array = False, index = True, enable_sort_and_agg = True, store = True)
             field_sid = tablestore.FieldSchema('study_id',tablestore.FieldType.KEYWORD, is_array = False, index = True, enable_sort_and_agg = True, store = True)
             field_organ = tablestore.FieldSchema('organ',tablestore.FieldType.KEYWORD, is_array = False, index = True, enable_sort_and_agg = True, store = True)
             field_region = tablestore.FieldSchema('region',tablestore.FieldType.KEYWORD, is_array = False, index = True, enable_sort_and_agg = True, store = True)
@@ -365,7 +365,7 @@ class HCAd_Client:
             col_return_type = tablestore.ColumnReturnType.SPECIFIED
 
         while not all_rows or next_token:
-            rows, next_token, total_count, is_all_succeed = self._Ali_client.search(table_name, 'metadata',
+            rows, next_token, total_count, is_all_succeed = self._Ali_client.search(self._tablename, 'metadata',
                 tablestore.SearchQuery(query, next_token=next_token, limit=100, get_total_count=True),
                 columns_to_get=tablestore.ColumnsToGet(cols_to_get, col_return_type))
             all_rows.extend(rows)
