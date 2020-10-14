@@ -373,7 +373,7 @@ class HCAd_Client:
 
         return all_rows
     
-        def update_row(self, primary_key, update_data):
+    def update_row(self, primary_key, update_data):
     # primary_key 是主键，如[('study_id','10.1038/s41467-019-10756-2'), ('cell_id','human_control-AAACCTGAGCTGAAAT'),('user_id',3)]
     # updtae_data 是待更新的列的list，[(col1,val1),(col2,val2)]
         try:
