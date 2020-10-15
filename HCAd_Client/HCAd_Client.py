@@ -237,7 +237,7 @@ class HCAd_Client:
             print("Cell number doesn't match.")
             return -1
         
-        if (df_expression.columns!=df_annotation.shape[0]).any():
+        if (df_expression.columns!=df_annotation.index).any():
             print("Cell names or orders doesn't match.")
             return -1
         
