@@ -223,7 +223,7 @@ class HCAd_Client:
         
     
     def insert_matrix(self, df_expression, df_annotation, genenum_chk=True, start_row = 0):
-        if (not genenum_chk) or df_expression.shape[0] != 43878:
+        if genenum_chk and df_expression.shape[0] != 43878:
             print("Gene number error.")
             return -1
         
@@ -237,7 +237,7 @@ class HCAd_Client:
             print("Cell number doesn't match.")
             return -1
         
-        if (df_expression.columns!=df_annotation.shape[0]).any():
+        if (df_expression.columns!=df_annotation.index).any():
             print("Cell names or orders doesn't match.")
             return -1
         
