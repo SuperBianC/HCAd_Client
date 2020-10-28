@@ -271,7 +271,7 @@ class HCAd_Client:
         
     def build_index(self):
         index_list = self._Ali_client.list_search_index(self._tablename)
-        if index_list and 'metadata' in index_list:
+        if index_list and ('SampleTable', 'metadata')  in index_list:
             print("index already exist.")
         else:
             # create index
@@ -330,12 +330,15 @@ class HCAd_Client:
     def get_columnsbycell(self,rows_to_get,cols_to_get=None,col_filter=None):
         request = tablestore.BatchGetRowRequest()
         df = []
+        colnames = None
         for i in range(len(rows_to_get)//100+1):
             request.add(tablestore.TableInBatchGetRowItem(self._tablename, rows_to_get[i*100:i*100+99],cols_to_get,col_filter,1))
             try:
                 got_rows = self._Ali_client.batch_get_row(request).get_succeed_rows()
                 for row in got_rows:
                     if not row.row is None:
+                        if colnames == None:
+                            colnames = [x[0] for x in row.row.primary_key] + [x[0] for x in row.row.attribute_columns]
                         df.append([x[1] for x in row.row.primary_key] + [x[1] for x in row.row.attribute_columns])
             except tablestore.OTSClientError as e:
                 print(e)
@@ -345,7 +348,7 @@ class HCAd_Client:
                 print("no cell satisfy")
         else:
             df = pd.DataFrame(df)
-            df.columns = [x[0] for x in row.row.primary_key] + [x[0] for x in row.row.attribute_columns]
+            df.columns = colnames
             return df
         
     def get_column_set(self, col_to_get, col_filter=None):
